@@ -1140,4 +1140,4 @@ function PixiePlot:New(wndContainer, tOpt)
 end
 
 -- Register Library
-Apollo.RegisterPackage(PixiePlot, "Drafto:Lib:PixiePlot-1.4", 3, {"Drafto:Lib:XmlDocument-1.1"})
+Apollo.RegisterPackage(PixiePlot, "Drafto:Lib:PixiePlot-1.4", 3, {"Drafto:Lib:XmlDocument-1.0"})
