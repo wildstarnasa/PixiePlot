@@ -795,11 +795,13 @@ end
 -- @param pos A table containing x1,y1,x2,y2 coordinates for the tooltip.
 -- @param size Width and height of the tooltip. 
 function PixiePlot:AddWindowOverlay(pos, size)
-	local XmlNode = Apollo.GetPackage("Drafto:Lib:XmlNode-1.1").tPackage
-	if not XmlNode then return end
-	
-	local node = XmlNode:New("PixiePlot:WindowOverlay", "Form", "Window", {
-		AnchorPoints = {0,0,0,0},
+	local XmlDocument = Apollo.GetPackage("Drafto:Lib:XmlDocument-1.0").tPackage
+	if not XmlDocument then return end
+
+    local tDoc = XmlDocument.NewForm()
+    local tForm = tDoc:NewFormNode("PixiePlotOverlay", {
+    	TooltipType = "OnCursor",
+    	AnchorPoints = {0,0,0,0},
 		AnchorOffsets = {
 			pos.x - size/2,
 			self.wnd:GetHeight() - (pos.y + size/2),
@@ -807,7 +809,9 @@ function PixiePlot:AddWindowOverlay(pos, size)
 			self.wnd:GetHeight() - (pos.y - size/2)
 		}
 	})
-	local wnd = node:LoadForm(self.wnd, self)
+
+    tDoc:GetRoot():AddChild(tForm)
+	local wnd = tDoc:LoadForm("PixiePlotOverlay", self.wnd, self)
 	if not wnd then 
 		return 
 	end
@@ -1136,4 +1140,4 @@ function PixiePlot:New(wndContainer, tOpt)
 end
 
 -- Register Library
-Apollo.RegisterPackage(PixiePlot, "Drafto:Lib:PixiePlot-1.4", 3, {"Drafto:Lib:XmlNode-1.1"})
+Apollo.RegisterPackage(PixiePlot, "Drafto:Lib:PixiePlot-1.4", 3, {"Drafto:Lib:XmlDocument-1.1"})
