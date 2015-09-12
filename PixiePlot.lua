@@ -34,6 +34,10 @@ PixiePlot.STEM = 2
 PixiePlot.SCATTER = 3
 PixiePlot.PIE = 4
 
+-- Fill Styles
+PixiePlot.LINEONLY = 1
+PixiePlot.FILL =  2
+
 -- Coordinate Systems
 PixiePlot.CARTESIAN = 1
 PixiePlot.POLAR = 2
@@ -227,18 +231,33 @@ function PixiePlot:PlotDataSet(dataSet, color, nBarIndex)
 				if v == math.huge then v = 0 end
 				if ePlotStyle == self.LINE then
 					if i > 1 then
-						self:DrawLine(
-							{
-								x1 = self.tOpt.fYLabelMargin + xOffset + (i - 2) * xIntervalWidth,
-								y1 = self.tOpt.fXLabelMargin + (vPrev - self.fYMin) / fYRange * maxHeight,
-								x2 = self.tOpt.fYLabelMargin + xOffset + (i - 1) * xIntervalWidth,
-								y2 = self.tOpt.fXLabelMargin + (v - self.fYMin) / fYRange * maxHeight
-							},
-							"",
-							self.tOpt.fLineWidth,
-							self.tOpt.strLineSprite,
-							color
-						)
+						if self.tOpt.eFillStyle == PixiePlot.FILL then
+							self:DrawFilledLine(
+								{
+									x1 = self.tOpt.fYLabelMargin + xOffset + (i - 2) * xIntervalWidth,
+									y1 = self.tOpt.fXLabelMargin + (vPrev - self.fYMin) / fYRange * maxHeight,
+									x2 = self.tOpt.fYLabelMargin + xOffset + (i - 1) * xIntervalWidth,
+									y2 = self.tOpt.fXLabelMargin + (v - self.fYMin) / fYRange * maxHeight
+								},
+								"",
+								self.tOpt.fLineWidth,
+								self.tOpt.strLineSprite,
+								color
+							)
+						else
+							self:DrawLine(
+								{
+									x1 = self.tOpt.fYLabelMargin + xOffset + (i - 2) * xIntervalWidth,
+									y1 = self.tOpt.fXLabelMargin + (vPrev - self.fYMin) / fYRange * maxHeight,
+									x2 = self.tOpt.fYLabelMargin + xOffset + (i - 1) * xIntervalWidth,
+									y2 = self.tOpt.fXLabelMargin + (v - self.fYMin) / fYRange * maxHeight
+								},
+								"",
+								self.tOpt.fLineWidth,
+								self.tOpt.strLineSprite,
+								color
+							)
+						end
 					end
 				elseif ePlotStyle == self.STEM then
 					self:DrawLine(
@@ -384,18 +403,33 @@ function PixiePlot:PlotDataSet(dataSet, color, nBarIndex)
 					v.x, v.y = polToCart(v.x, v.y)
 				end
 				if i > 1 then
-					self:DrawLine(
-						{
-							x1 = self.tOpt.fYLabelMargin + (vPrev.x - self.fXMin) / fXRange * maxWidth,
-							y1 = self.tOpt.fXLabelMargin + (vPrev.y - self.fYMin) / fYRange * maxHeight,
-							x2 = self.tOpt.fYLabelMargin + (v.x - self.fXMin) / fXRange * maxWidth,
-							y2 = self.tOpt.fXLabelMargin + (v.y - self.fYMin) / fYRange * maxHeight
-						},
-						"",
-						self.tOpt.fLineWidth,
-						self.tOpt.strLineSprite,
-						color
-					)
+					if self.tOpt.eFillStyle == PixiePlot.FILL then
+						self:DrawFilledLine(
+							{
+								x1 = self.tOpt.fYLabelMargin + (vPrev.x - self.fXMin) / fXRange * maxWidth,
+								y1 = self.tOpt.fXLabelMargin + (vPrev.y - self.fYMin) / fYRange * maxHeight,
+								x2 = self.tOpt.fYLabelMargin + (v.x - self.fXMin) / fXRange * maxWidth,
+								y2 = self.tOpt.fXLabelMargin + (v.y - self.fYMin) / fYRange * maxHeight
+							},
+							"",
+							self.tOpt.fLineWidth,
+							self.tOpt.strLineSprite,
+							color
+						)
+					else
+						self:DrawLine(
+							{
+								x1 = self.tOpt.fYLabelMargin + (vPrev.x - self.fXMin) / fXRange * maxWidth,
+								y1 = self.tOpt.fXLabelMargin + (vPrev.y - self.fYMin) / fYRange * maxHeight,
+								x2 = self.tOpt.fYLabelMargin + (v.x - self.fXMin) / fXRange * maxWidth,
+								y2 = self.tOpt.fXLabelMargin + (v.y - self.fYMin) / fYRange * maxHeight
+							},
+							"",
+							self.tOpt.fLineWidth,
+							self.tOpt.strLineSprite,
+							color
+						)
+					end
 				end
 				vPrev = v
 			end
@@ -758,6 +792,22 @@ function PixiePlot:DrawLine(line, text, width, sprite, color, clrText)
 	})
 end
 
+--- Draws a filled polygon on the canvas, from the line coords to the canvas base.
+-- @param line A table containing x1,y1,x2,y2 coordinates for the line.
+-- @param width Width of the line.
+-- @param sprite Sprite to use.
+-- @param color A table with keys a, r, g, b. Values should be numbers 0.0-1.0.
+function PixiePlot:DrawFilledLine(line, text, width, sprite, color, clrText)
+	local curpos = line.x1
+	local slope = (line.y2 - line.y1) / (line.x2 - line.x1)
+	while curpos <= line.x2 do
+		local ypos = slope * (curpos - line.x1) + line.y1
+		local line = {x1 = curpos, x2 = curpos, y1 = 0, y2 = ypos}
+		self:DrawLine(line, '', 3, sprite, color, clrText)
+		curpos = curpos + 1
+	end
+end
+
 --- Adds a symbol to the canvas.
 -- Flips y-axis.
 -- @param pos A table containing x1,y1,x2,y2 coordinates for the symbol.
@@ -1030,7 +1080,7 @@ setmetatable(PixiePlot, {
 local tDefaultOptions = {
 	ePlotStyle = PixiePlot.LINE,
 	eCoordinateSystem = PixiePlot.CARTESIAN,
-
+	eFillStyle = PixiePlot.LINEONLY,
 	fYLabelMargin = 25,
 	fXLabelMargin = 25,
 	fPlotMargin = 10,
