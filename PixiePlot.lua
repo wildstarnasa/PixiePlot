@@ -238,6 +238,7 @@ function PixiePlot:PlotDataSet(dataSet, color, nBarIndex)
 									y1 = self.tOpt.fXLabelMargin + (vPrev - self.fYMin) / fYRange * maxHeight,
 									x2 = self.tOpt.fYLabelMargin + xOffset + (i - 1) * xIntervalWidth,
 									y2 = self.tOpt.fXLabelMargin + (v - self.fYMin) / fYRange * maxHeight
+									
 								},
 								"",
 								self.tOpt.fLineWidth,
@@ -802,7 +803,7 @@ function PixiePlot:DrawFilledLine(line, text, width, sprite, color, clrText)
 	local slope = (line.y2 - line.y1) / (line.x2 - line.x1)
 	while curpos <= line.x2 do
 		local ypos = slope * (curpos - line.x1) + line.y1
-		local line = {x1 = curpos, x2 = curpos, y1 = 0, y2 = ypos}
+		local line = {x1 = curpos, x2 = curpos, y1 = self.tOpt.fXLabelMargin, y2 = ypos}
 		self:DrawLine(line, '', 3, sprite, color, clrText)
 		curpos = curpos + 1
 	end
